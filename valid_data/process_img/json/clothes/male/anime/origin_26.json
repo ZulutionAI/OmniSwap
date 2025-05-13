@@ -1,0 +1,45 @@
+{
+    "image_id": "origin_26",
+    "segments": [
+        {
+            "id": 0,
+            "word": "Subject0",
+            "bbox": [
+                17,
+                518,
+                129,
+                892
+            ],
+            "score": 0.6089882850646973,
+            "coco_label": "person"
+        },
+        {
+            "id": 1,
+            "word": "Subject1",
+            "bbox": [
+                352,
+                419,
+                766,
+                1331
+            ],
+            "score": 0.6273081302642822,
+            "coco_label": "person"
+        },
+        {
+            "id": 2,
+            "word": "Subject2",
+            "bbox": [
+                118,
+                337,
+                392,
+                1327
+            ],
+            "score": 0.6382891535758972,
+            "coco_label": "person"
+        }
+    ],
+    "image_size": {
+        "h": 768,
+        "w": 1376
+    }
+}

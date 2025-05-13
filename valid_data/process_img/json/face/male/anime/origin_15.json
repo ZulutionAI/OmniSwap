@@ -1,0 +1,21 @@
+{
+    "image_id": "origin_15",
+    "segments": [
+        {
+            "id": 0,
+            "word": "Subject0",
+            "bbox": [
+                1,
+                392,
+                766,
+                1149
+            ],
+            "score": 0.8787031173706055,
+            "coco_label": "person"
+        }
+    ],
+    "image_size": {
+        "h": 768,
+        "w": 1376
+    }
+}

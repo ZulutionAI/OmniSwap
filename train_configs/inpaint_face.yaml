@@ -1,0 +1,65 @@
+model_name: "flux-dev"
+data_config:
+  train_batch_size: 1
+  num_workers: 20
+  img_size: 512
+  img_dir: images/
+  data_num: -1
+  box_type: face
+  aug: True
+  center_crop: False
+  face_pad: True
+  genal_caption_flag: True
+  atten_mask_type: "face_hair"
+  have_cloth: False
+  img_size_h: -1
+  img_size_w: -1
+  ip_number: 1
+  ani_picture: True
+  real_picture: True
+  do_only_cloth: False
+  max_side_len: 768
+  face_align: True
+  face_min_area: 0.005
+  clip_image_size: 336
+report_to: tensorboard
+train_batch_size: 1
+output_dir: saves_inpaint_face
+max_train_steps: 200000
+learning_rate: 2e-5
+lr_scheduler: cosine
+lr_warmup_steps: 10
+adam_beta1: 0.9
+adam_beta2: 0.999
+adam_weight_decay: 0.01
+adam_epsilon: 1e-8
+max_grad_norm: 1.0
+logging_dir: logs
+mixed_precision: "bf16"
+checkpointing_steps: 1000
+checkpoints_total_limit: 10
+tracker_project_name: ipa_inpainting
+resume_from_checkpoint: latest
+gradient_accumulation_steps: 2
+rank: 16
+single_blocks: "1,2,3,4"
+double_blocks: null
+finetune_blocks: ["ip_adapter"]
+feature_type: "clip_pooling_local_mix_face"
+control_type: "inpainting"
+control_item: "mask_image_skeleton_canny" 
+control_weight: "./checkpoints/checkpoint-face/ip_adaptor_controlnet.safetensors"
+improj_weight: "./checkpoints/checkpoint-face/ip_adaptor_project.safetensors"
+dit_weight: "./checkpoints/checkpoint-face/ip_adaptor.safetensors"
+ip_type: "v3"
+data_type: "v6"
+control_depth: 6
+do_vae: True
+use_arc_face: True
+guidance_vec: 1
+id_loss_weight: 1.0
+clip_loss_weight: 0.1
+image_encoder_path: EVA02-CLIP-L-14-336
+only_id_feature: False
+open_control: False
+is_ipa: False

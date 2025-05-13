@@ -1,0 +1,21 @@
+{
+    "image_id": "reference_11",
+    "segments": [
+        {
+            "id": 0,
+            "word": "Subject0",
+            "bbox": [
+                0,
+                0,
+                227,
+                280
+            ],
+            "score": 0.8490455150604248,
+            "coco_label": "person"
+        }
+    ],
+    "image_size": {
+        "h": 228,
+        "w": 280
+    }
+}
