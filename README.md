@@ -11,8 +11,8 @@ cd data_process
 
 启动示例：
 
-python lang_sam.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
-
+```python lang_sam.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
+```
 注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
 
 其余参数解析：
