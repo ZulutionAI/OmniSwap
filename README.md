@@ -105,6 +105,7 @@ cd sapiens/pose && bash keypoints308.sh
   - https://pan.baidu.com/s/1U61GOFYUtZemqJz7_9WEaQ?pwd=wa9x 提取码: wa9x 
 - danbooru_anime [不含图片], 82947
   - https://pan.baidu.com/s/1U61GOFYUtZemqJz7_9WEaQ?pwd=wa9x 提取码: wa9x 
+- tuchong
 
 注意：
 其中，vcg_122w, vcg_images_80w, vcg_reelshort_0_200, vcg_chat_history_0_300_two_people, anime_pictures_46w, danbooru_anime，如果需要图片，请发送邮件到wxktongji@163.com，说明身份/用途
@@ -179,7 +180,8 @@ cd sapiens/pose && bash keypoints308.sh
     |-- mask
     |-- mask_sapiens
     `-- skeleton_sapiens
-验证数据 
+
+## 验证数据 
 我们准备了真人/动漫，换脸 or 换装的几种case，数据存放地址：./valid_data
 |-- mask
 |   |-- clothes
@@ -205,7 +207,8 @@ cd sapiens/pose && bash keypoints308.sh
 `-- reference
     |-- clothes
     `-- face
-模型
+
+# 模型
 换脸模型：FLUX-Inpainting-IPA-face： https://pan.baidu.com/s/1N5gY0GfjXroMyv6DwYw7bw?pwd=p23s 提取码: p23s 
 换装模型：FLUX-Inpainting-IPA-cloth： https://pan.baidu.com/s/1BKQHrN1Irocs5iHSm43yfA?pwd=8bst 提取码: 8bst 
 antelopev2：https://pan.baidu.com/s/1rDxuSv9FSYiB-sQJm4tmlA?pwd=8p9x 提取码: 8p9x 
@@ -226,19 +229,19 @@ dinov2_vitg14：https://pan.baidu.com/s/1cl1YPyvUFh24lL7P-ESZfg?pwd=wdrm 提取�
     |-- ip_adaptor_controlnet.safetensors
     `-- ip_adaptor_project.safetensors
 
-环境
+# 环境
 conda env create -f environment.yml
-代码说明
-- 启动训练：
-  - 训练
-python3 train_flux_deepspeed_inpainting_ipa.py
 
+# 代码说明
+## 训练
+python3 train_flux_deepspeed_inpainting_ipa.py
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
     --config_file accelerate_deepspeed_bf16.yaml \
     --main_process_port 30090 \
     --num_processes 8 \
     train_flux_deepspeed_inpainting_ipa.py \
     --config "train_configs/inpaint_cloth.yaml"
-  - 评测
+## 评测
 python3 valid_training.py
-效果
+
+# 效果
