@@ -1,6 +1,9 @@
 # 数据集
 
 ## 数据处理pipeline
+
+cd data_process
+
 ### Step1:Lang_sam
 得到图片中人物的分割
 
@@ -8,8 +11,8 @@
 
 启动示例：
 
-python lang_sam.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
-
+```python lang_sam.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
+```
 注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
 
 其余参数解析：
@@ -24,7 +27,8 @@ python lang_sam.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
 
 启动示例：
 
-python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
+```python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
+```
 
 注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
 
@@ -40,8 +44,8 @@ python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
 
 启动示例：
 
-python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
-
+```python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
+```
 注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
 
 其余参数解析：
@@ -56,8 +60,8 @@ python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
 
 启动示例：
 
-python face_parse_real.py --dataset_root_path xxx 
-
+```python face_parse_real.py --dataset_root_path xxx 
+```
 注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
 
 其余参数解析：
@@ -74,8 +78,8 @@ python face_parse_real.py --dataset_root_path xxx
 
 启动示例：
 
-cd sapiens/seg && bash seg.sh
-
+```cd sapiens/seg && bash seg.sh
+```
 ### Step4:sapiens_skeleton
 
 入口 ./sapiens/pose/keypoints308.sh
@@ -84,8 +88,8 @@ cd sapiens/seg && bash seg.sh
 
 启动示例：
 
-cd sapiens/pose && bash keypoints308.sh
-
+```cd sapiens/pose && bash keypoints308.sh
+```
 ## 训练数据
 - vcg_122w [不含图片], 467725
   - https://pan.baidu.com/s/1tuy5hYuYh-k3FDtgp4Vrmw?pwd=yhew 提取码: yhew 
@@ -111,7 +115,7 @@ cd sapiens/pose && bash keypoints308.sh
 其中，vcg_122w, vcg_images_80w, vcg_reelshort_0_200, vcg_chat_history_0_300_two_people, anime_pictures_46w, danbooru_anime，如果需要图片，请发送邮件到wxktongji@163.com，说明身份/用途
 
 另外，数据集解压之后，请按照以下结构去除多余目录，以下文件目录格式为准：
-|-- anime_pictures_46w
+```|-- anime_pictures_46w
 |   |-- caption
 |   |-- img
 |   |-- json_w_face_body
@@ -179,11 +183,11 @@ cd sapiens/pose && bash keypoints308.sh
     |-- json_final
     |-- mask
     |-- mask_sapiens
-    `-- skeleton_sapiens
+    `-- skeleton_sapiens```
 
 ## 验证数据 
 我们准备了真人/动漫，换脸 or 换装的几种case，数据存放地址：./valid_data
-|-- mask
+```|-- mask
 |   |-- clothes
 |   `-- face
 |-- origin
@@ -206,17 +210,22 @@ cd sapiens/pose && bash keypoints308.sh
 |   `-- skeleton_sapiens_308
 `-- reference
     |-- clothes
-    `-- face
+    `-- face```
 
 # 模型
+
 换脸模型：FLUX-Inpainting-IPA-face： https://pan.baidu.com/s/1N5gY0GfjXroMyv6DwYw7bw?pwd=p23s 提取码: p23s 
+
 换装模型：FLUX-Inpainting-IPA-cloth： https://pan.baidu.com/s/1BKQHrN1Irocs5iHSm43yfA?pwd=8bst 提取码: 8bst 
+
 antelopev2：https://pan.baidu.com/s/1rDxuSv9FSYiB-sQJm4tmlA?pwd=8p9x 提取码: 8p9x 
+
 CurricularFace：https://pan.baidu.com/s/15AIykSXedKYe9qOqdAHcMQ?pwd=nawi 提取码: nawi 
+
 dinov2_vitg14：https://pan.baidu.com/s/1cl1YPyvUFh24lL7P-ESZfg?pwd=wdrm 提取码: wdrm 
 
 模型目录结构：
-|-- CurricularFace
+```|-- CurricularFace
 |   `-- CurricularFace_Backbone.pth
 |-- antelopev2
 |   `-- glintr100.onnx
@@ -228,20 +237,20 @@ dinov2_vitg14：https://pan.baidu.com/s/1cl1YPyvUFh24lL7P-ESZfg?pwd=wdrm 提取�
     |-- ip_adaptor.safetensors
     |-- ip_adaptor_controlnet.safetensors
     `-- ip_adaptor_project.safetensors
-
+```
 # 环境
 conda env create -f environment.yml
 
 # 代码说明
 ## 训练
-python3 train_flux_deepspeed_inpainting_ipa.py
+```python3 train_flux_deepspeed_inpainting_ipa.py
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
     --config_file accelerate_deepspeed_bf16.yaml \
     --main_process_port 30090 \
     --num_processes 8 \
     train_flux_deepspeed_inpainting_ipa.py \
-    --config "train_configs/inpaint_cloth.yaml"
+    --config "train_configs/inpaint_cloth.yaml"```
 ## 评测
-python3 valid_training.py
+```python3 valid_training.py```
 
 # 效果
