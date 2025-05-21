@@ -31,12 +31,12 @@ clip_image_processor = CLIPImageProcessor(crop_size={"height": 336, "width": 336
 def init_face_model():
     print("Loading face recognition model")
     facerecog_model = IR_101([112, 112])
-    facerecog_model.load_state_dict(torch.load("checkpoints/CurricularFace/CurricularFace_Backbone.pth"))
+    facerecog_model.load_state_dict(torch.load("./checkpoints/CurricularFace/CurricularFace_Backbone.pth"))
     facerecog_model.requires_grad_(False)
     facerecog_model.eval()
     
     print("Loading handler_ante model")
-    handler_ante = insightface.model_zoo.get_model('checkpoints/antelopev2/glintr100.onnx')
+    handler_ante = insightface.model_zoo.get_model('./checkpoints/antelopev2/glintr100.onnx')
     handler_ante.prepare(ctx_id=0)
     return facerecog_model, handler_ante
 

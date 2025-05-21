@@ -6,6 +6,7 @@ import re
 import random
 from PIL import Image
 import shutil
+import cv2
 from safetensors.torch import save_file
 import datasets
 import numpy as np
@@ -28,31 +29,16 @@ from src.flux.util import (configs, load_ae, load_clip,
                        load_flow_model2, load_t5, load_controlnet, load_checkpoint)
 
 from src.flux.modules.layers import (
-    SingleStreamBlockProcessor,
-    DoubleStreamBlockProcessor,
-    SingleStreamBlockLoraProcessor,
-    DoubleStreamBlockLoraProcessor,
     IPDoubleStreamBlockProcessor,
-    IPDoubleStreamBlockProcessorV2,
     IPDoubleStreamBlockProcessorV3,
-    IPDoubleStreamBlockProcessorV4,
     IPSingleStreamBlockProcessor,
     IPSingleStreamBlockProcessorV3,
-    IPSingleStreamBlockProcessorV4,
-    ImageProjModel,
-    ImageProjModelLocal,
-    ImageProjModelLocalB1,
-    ImageProjModelLocalB0,
-    ImageProjModelFaceLocal,
-    ImageProjModelLocalB0_face,
-    ImageProjModelLocalB2_face,
-    ImageProjModelLocalB3_face
 )
-from src.flux.modules.projection_models import MLPMixIDModel, MLPMixIDModel_v2, MLPMixIDModelQFormer, MLPMixIDModelTransformer
+from src.flux.modules.projection_models import MLPMixIDModel, MLPMixIDModel_v2
 
-from src.flux.ip_flux import IPFluxModelv2, IPFluxModelv3, IPFluxModelv7
+from src.flux.ip_flux import IPFluxModelv3, IPFluxModelv7
 
-from transformers import CLIPVisionModelWithProjection, CLIPImageProcessor
+from transformers import CLIPVisionModelWithProjection
 from src.flux.modules.facerecog_model import IR_101
 
 from eva_clip import create_model_and_transforms
@@ -120,24 +106,8 @@ def get_image_proj(
         image_prompt, image_encoder, feature_type="clip_pooling_local"
     ):
     return get_clip_embeddings(image_encoder, image_prompt)
-#     # encode image-prompt embeds
 
-#     if feature_type == "clip_pooling":
-#         image_prompt_embeds_pooling = image_encoder(
-#             image_prompt
-#         ).image_embeds
-#         image_prompt_embeds = None
-        
-#         #image_proj = improj(image_prompt_embeds)
 
-#     #elif feature_type in ["clip_pooling_local", "clip_face", "clip_pooling_local_b0_prompt_face", "clip_pooling_local_b1", "clip_pooling_local_b0_prompt", "clip_pooling_local_b0", "clip_h_pooling_local_b1", "clip_h_pooling_local"]:
-#     else:
-#         output_encoder = image_encoder(image_prompt, output_hidden_states=True)
-#         image_prompt_embeds = output_encoder.hidden_states[-2]
-#         image_prompt_embeds_pooling = output_encoder.image_embeds
-
-    
-#     return image_prompt_embeds, image_prompt_embeds_pooling
 def canny_processor(image, low_threshold=100, high_threshold=200):
     image = np.array(image)
     image = cv2.Canny(image, low_threshold, high_threshold)
@@ -204,9 +174,6 @@ def main():
     # vgg_model.to(accelerator.device, dtype=weight_dtype)
     # vgg_model.eval()
 
-    # controlnet = load_controlnet("flux-dev", accelerator.device, is_inpainting=is_inpainting)
-
-
     is_inpainting = True
     control_weight = args.control_weight
     print(args.control_weight)
@@ -219,18 +186,11 @@ def main():
         print("load weight ==>> \n" * 10)
 
     controlnet = controlnet.to(torch.float32)
-    # controlnet.train()
-    # 140000=canny-exp2
-    # checkpoint = load_checkpoint("/mnt2/wangxuekuan/code/flux/saves_canny_exp4/checkpoint-90000/controlnet.bin", None, None)
-    
-    # controlnet.load_state_dict(checkpoint, strict=False)
-    
+
     controlnet = controlnet.to(
         accelerator.device, dtype=weight_dtype
     ) #.requires_grad_(False)
  
-    # lora_attn_procs = {}
-    # clip_image_processor = CLIPImageProcessor()
     # load image encoder
     ip_scale = 1.0
     # image_encoder_path = ""
@@ -264,15 +224,6 @@ def main():
         facerecog_model.requires_grad_(False)
         facerecog_model.eval()
         # facerecog_model = facerecog_model
-
-
-    # image_encoder = CLIPModel.from_pretrained(clip_model_name).to(
-    #     accelerator.device, dtype=weight_dtype
-    # ).requires_grad_(False)
-
-    # self.processor = CLIPProcessor.from_pretrained(clip_model_name)
-
-    # clip_image_processor = CLIPImageProcessor()
 
     # setup image embedding projection model
     print("XX:", args.feature_type)
