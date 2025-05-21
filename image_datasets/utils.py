@@ -472,84 +472,7 @@ def c_crop_1344x768(image):
     # print("left, top, right, bottom:", left, top, right, bottom)
     return image.crop((left, top, width - right, height - bottom))
 '''
-/mnt2/wangxuekuan/data/ip_adapter_gpt4o__desc//mnt2/huangyuqiu/share/danbooru_anime/img/Dragon_Ball/son_goku/danbooru_8290662.txt
 '''
-def get_sapiens_path(json_path):
-    if "vcg_images_80W" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_images_80W/json_final", "/mnt2/zhenghaoyu/share/vcg_images_80W/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_images_80W/json_final", "/mnt2/zhenghaoyu/share/vcg_images_80W/skeleton_sapiens")
-    elif "vcg_images_122W_1" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/wangxuekuan/data/MSDBv2_json/mnt/wangxuekuan/data/vcg_images_122W_1_v3_format_simple_skeleton", 
-                                                "/mnt2/huangyuqiu/share/vcg_images_122W_1//mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/wangxuekuan/data/MSDBv2_json/mnt/wangxuekuan/data/vcg_images_122W_1_v3_format_simple_skeleton", 
-                                                "/mnt2/huangyuqiu/share/vcg_images_122W_1//skeleton_sapiens")
-    elif "flux_img_78_all" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_78_all/json_final", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_img_78_all/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_78_all/json_final", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_img_78_all/skeleton_sapiens")
-    elif "/mnt2/huangyuqiu/share/flux/json_final" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux/json_final", 
-                                                "/mnt2/huangyuqiu/share/flux/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux/json_final", 
-                                                "/mnt2/huangyuqiu/share/flux/skeleton_sapiens")
-    elif "flux_img_1character_78_all_noscene" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_1character_78_all_noscene/json_final", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_img_1character_78_all_noscene/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_1character_78_all_noscene/json_final", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_img_1character_78_all_noscene/skeleton_sapiens")
-    elif "flux_img_1character_78_all_scene" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_1character_78_all_scene/json_final", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_img_1character_78_all_scene/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_1character_78_all_scene/json_final", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_img_1character_78_all_scene/skeleton_sapiens")
-    elif "vcg_chat_history_0_300_two_people" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/json_final", 
-                                                "/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/json_final/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/json_final", 
-                                                "/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/json_final/skeleton_sapiens")
-    elif "vcg_chat_history_0_300_two_people" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/json_final", 
-                                                "/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/json_final", 
-                                                "/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/skeleton_sapiens")
-    elif "vcg_reelshort_0_200" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_reelshort_0_200/json_final", 
-                                                "/mnt2/huangyuqiu/share/vcg_reelshort_0_200/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_reelshort_0_200/json_final", 
-                                                "/mnt2/huangyuqiu/share/vcg_reelshort_0_200/skeleton_sapiens")
-    elif "flux_anime_1character" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/zhenghaoyu/prompt_data/flux_anime_1character/json_w_face", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_anime_1character/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/zhenghaoyu/prompt_data/flux_anime_1character/json_w_face", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_anime_1character/skeleton_sapiens")
-    elif "flux_anime_2characters" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/json_w_face", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/json_w_face", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/skeleton_sapiens")
-    # elif "danbooru_anime" in json_path:
-    #     mask_sapiens_path = json_path.replace("/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/json_w_face", 
-    #                                             "/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/mask_sapiens")[:-5] + "_seg.npz"
-    #     skeleton_sapiens_path = json_path.replace("/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/json_w_face", 
-    #                                             "/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/skeleton_sapiens")
-    else:
-        # print("error json path", json_path)
-        return None, None#self.__getitem__(random.randint(0, len(self.data) - 1))
-
-    if not os.path.exists(mask_sapiens_path):
-        mask_sapiens_path = mask_sapiens_path[:-3] + "npy"
-
-    if os.path.exists(skeleton_sapiens_path.replace("skeleton_sapiens", "skeleton_sapiens_308")):
-        skeleton_sapiens_path = skeleton_sapiens_path.replace("skeleton_sapiens", "skeleton_sapiens_308")
-
-    if not os.path.exists(mask_sapiens_path) or not os.path.exists(skeleton_sapiens_path):
-        print("no - data", mask_sapiens_path, skeleton_sapiens_path)
-        # self.error_idx.append(idx)
-        return None, None
-    
-    return mask_sapiens_path, skeleton_sapiens_path
-
 def fill_mask(mask):
     if mask is None:
         return None
@@ -570,81 +493,45 @@ def fill_mask(mask):
     
 def get_sapiens_sam_path(json_path):
     if "vcg_images_80W" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_images_80W/json_final", "/mnt2/zhenghaoyu/share/vcg_images_80W/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_images_80W/json_final", "/mnt2/zhenghaoyu/share/vcg_images_80W/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_images_80W/json_final", "/mnt2/huangyuqiu/share/vcg_images_80W/mask")[:-5] + ".npz"
-    elif "vcg_images_122W_1" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/wangxuekuan/data/MSDBv2_json/mnt/wangxuekuan/data/vcg_images_122W_1_v3_format_simple_skeleton", 
-                                                "/mnt2/huangyuqiu/share/vcg_images_122W_1/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/wangxuekuan/data/MSDBv2_json/mnt/wangxuekuan/data/vcg_images_122W_1_v3_format_simple_skeleton", 
-                                                "/mnt2/huangyuqiu/share/vcg_images_122W_1/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/wangxuekuan/data/MSDBv2_json/mnt/wangxuekuan/data/vcg_images_122W_1_v3_format_simple_skeleton", "/mnt2/huangyuqiu/share/vcg_images_122W_1/mask")[:-5] + ".npz"
-    elif "/mnt2/huangyuqiu/share/flux_img_78_all/json_final" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_78_all/json_final", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_img_78_all/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_78_all/json_final", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_img_78_all/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_78_all/json_final", "/mnt2/zhenghaoyu/prompt_data/flux_img_78_all/mask")[:-5] + ".npz"
-    elif "/mnt2/huangyuqiu/share/flux/json_final" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux/json_final", 
-                                                "/mnt2/huangyuqiu/share/flux/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux/json_final", 
-                                                "/mnt2/huangyuqiu/share/flux/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/huangyuqiu/share/flux/json_final", "/mnt2/huangyuqiu/share/flux/mask")[:-5] + ".npz"
-    elif "flux_img_1character_78_all_noscene" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_1character_78_all_noscene/json_final", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_img_1character_78_all_noscene/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_1character_78_all_noscene/json_final", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_img_1character_78_all_noscene/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_1character_78_all_noscene/json_final", "/mnt2/zhenghaoyu/prompt_data/flux_img_1character_78_all_noscene/mask")[:-5] + ".npz"
-    elif "flux_img_1character_78_all_scene" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_1character_78_all_scene/json_final", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_img_1character_78_all_scene/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_1character_78_all_scene/json_final", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_img_1character_78_all_scene/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/huangyuqiu/share/flux_img_1character_78_all_scene/json_final", "/mnt2/zhenghaoyu/prompt_data/flux_img_1character_78_all_scene/mask")[:-5] + ".npz"
+        mask_sapiens_path = json_path.replace("json_final", "mask_sapiens")[:-5] + "_seg.npz"
+        skeleton_sapiens_path = json_path.replace("json_final", "skeleton_sapiens")
+        mask_sam_path = json_path.replace("json_final", "mask")[:-5] + ".npz"
+    elif "vcg_122w" in json_path:
+        mask_sapiens_path = json_path.replace("json_final", "mask_sapiens")[:-5] + "_seg.npz"
+        skeleton_sapiens_path = json_path.replace("json_final", "skeleton_sapiens")
+        mask_sam_path = json_path.replace("json_final", "mask")[:-5] + ".npz"
+    elif "flux_img_78_all" in json_path:
+        mask_sapiens_path = json_path.replace("json_final", "mask_sapiens")[:-5] + "_seg.npz"
+        skeleton_sapiens_path = json_path.replace("json_final", "skeleton_sapiens")
+        mask_sam_path = json_path.replace("json_final", "mask")[:-5] + ".npz"
     elif "vcg_chat_history_0_300_two_people" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/json_final", 
-                                                "/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/json_final", 
-                                                "/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/json_final", "/mnt2/huangyuqiu/share/vcg_chat_history_0_300_two_people/mask")[:-5] + ".npz"
+        mask_sapiens_path = json_path.replace("json_final", "mask_sapiens")[:-5] + "_seg.npz"
+        skeleton_sapiens_path = json_path.replace("json_final", "skeleton_sapiens")
+        mask_sam_path = json_path.replace("json_final", "mask")[:-5] + ".npz"
     elif "vcg_reelshort_0_200" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_reelshort_0_200/json_final", 
-                                                "/mnt2/huangyuqiu/share/vcg_reelshort_0_200/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_reelshort_0_200/json_final", 
-                                                "/mnt2/huangyuqiu/share/vcg_reelshort_0_200/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/huangyuqiu/share/vcg_reelshort_0_200/json_final", "/mnt2/huangyuqiu/share/vcg_reelshort_0_200/mask")[:-5] + ".npz"
+        mask_sapiens_path = json_path.replace("json_final", "mask_sapiens")[:-5] + "_seg.npz"
+        skeleton_sapiens_path = json_path.replace("json_final", "skeleton_sapiens")
+        mask_sam_path = json_path.replace("json_final", "mask")[:-5] + ".npz"
     elif "flux_anime_1character" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/zhenghaoyu/prompt_data/flux_anime_1character/json_w_face", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_anime_1character/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/zhenghaoyu/prompt_data/flux_anime_1character/json_w_face", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_anime_1character/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/zhenghaoyu/prompt_data/flux_anime_1character/json_w_face", 
-                                          "/mnt2/zhenghaoyu/prompt_data/flux_anime_1character/mask")[:-5] + ".npz"
+        mask_sapiens_path = json_path.replace("json_w_face", "mask_sapiens")[:-5] + "_seg.npz"
+        skeleton_sapiens_path = json_path.replace("json_w_face", "skeleton_sapiens")
+        mask_sam_path = json_path.replace("json_w_face", "mask")[:-5] + ".npz"
     elif "flux_anime_2characters" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/json_w_face", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/json_w_face", 
-                                                "/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/json_w_face", 
-                                          "/mnt2/zhenghaoyu/prompt_data/flux_anime_2characters/mask")[:-5] + ".npz"
+        mask_sapiens_path = json_path.replace("json_w_face", "mask_sapiens")[:-5] + "_seg.npz"
+        skeleton_sapiens_path = json_path.replace("json_w_face", "skeleton_sapiens")
+        mask_sam_path = json_path.replace("json_w_face", "mask")[:-5] + ".npz"
     elif "tuchong" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/tuchong/json_new", 
-                                                "/mnt2/huangyuqiu/share/tuchong_full/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/tuchong/json_new", 
-                                                "/mnt2/huangyuqiu/share/tuchong_full/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/huangyuqiu/share/tuchong/json_new", "/mnt2/huangyuqiu/share/tuchong_full/mask")[:-5] + ".npz"
+        mask_sapiens_path = json_path.replace("json_final", "mask_sapiens")[:-5] + "_seg.npz"
+        skeleton_sapiens_path = json_path.replace("json_final", "skeleton_sapiens")
+        mask_sam_path = json_path.replace("json_final", "mask")[:-5] + ".npz"
     elif "anime_pictures" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/anime_pictures/json_w_face", 
-                                                "/mnt2/huangyuqiu/share/anime_pictures/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/huangyuqiu/share/anime_pictures/json_w_face", 
-                                                "/mnt2/huangyuqiu/share/anime_pictures/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/huangyuqiu/share/anime_pictures/json_w_face", "/mnt2/huangyuqiu/share/anime_pictures/mask")[:-5] + ".npz"
+        mask_sapiens_path = json_path.replace("json_w_face_body", "mask_sapiens")[:-5] + "_seg.npz"
+        skeleton_sapiens_path = json_path.replace("json_w_face_body", "skeleton_sapiens")
+        mask_sam_path = json_path.replace("json_w_face", "mask")[:-5] + ".npz"
     elif "ponyXL" in json_path:
-        mask_sapiens_path = json_path.replace("/mnt2/zhenghaoyu/share/ponyXL/json_final", "/mnt2/zhenghaoyu/share/ponyXL/mask_sapiens")[:-5] + "_seg.npz"
-        skeleton_sapiens_path = json_path.replace("/mnt2/zhenghaoyu/share/ponyXL/json_final", "/mnt2/zhenghaoyu/share/ponyXL/skeleton_sapiens")
-        mask_sam_path = json_path.replace("/mnt2/zhenghaoyu/share/ponyXL/json_final", "/mnt2/zhenghaoyu/share/ponyXL/mask")[:-5] + ".npz"
+        mask_sapiens_path = json_path.replace("json_final", "mask_sapiens")[:-5] + "_seg.npz"
+        skeleton_sapiens_path = json_path.replace("json_final", "skeleton_sapiens")
+        mask_sam_path = json_path.replace("json_final", "mask")[:-5] + ".npz"
     else:  
         # print("error json path", json_path)
         return None, None, None#self.__getitem__(random.randint(0, len(self.data) - 1))
@@ -687,7 +574,7 @@ class FastVisualizer:
 
     def __init__(self, metainfo=None, radius=1, line_width=1, kpt_thr=0.3):
         if metainfo is None:
-            metainfo = json.load(open('/ucloud/mnt-98T/zhenghaoyu/prompt_data/flux_img_78_all/skeleton_sapiens_308/0001/999_1725459878_Riley_hitting_Amber_with_a_pillow_2.json', 'r'))['meta_info']
+            metainfo = json.load(open('./data/flux_img_78_all/skeleton_sapiens_308/0001/999_1725459878_Riley_hitting_Amber_with_a_pillow_2.json', 'r'))['meta_info']
         self.radius = radius
         self.line_width = line_width
         self.kpt_thr = kpt_thr

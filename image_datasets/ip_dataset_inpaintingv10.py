@@ -252,33 +252,21 @@ class IpAdaptorImageDataset(Dataset):
         plist = []
         if self.real_picture:
             plist += [
-                "/mnt2/wangxuekuan/code/x-flux.bk/data/ip_adapter/train_ip_vcg_80w.txt",
-                "/mnt2/wangxuekuan/code/x-flux.bk/data/ip_adapter/train_ip_flux_1.txt",
-                "/mnt2/wangxuekuan/code/x-flux.bk/data/ip_adapter/train_ip_vcg_122w.txt",
-                "/mnt2/wangxuekuan/code/x-flux.bk/data/ip_adapter/train_ip_vcg_chat_history_0_300_two_people.txt",
-                "/mnt2/wangxuekuan/code/x-flux.bk/data/ip_adapter/train_ip_vcg_reelshort_0_200.txt",
+                "./data/train_ip_vcg_80w.txt",
+                "./data/train_ip_flux_1.txt",
+                "./data/train_ip_vcg_122w.txt",
+                "./data/train_ip_vcg_chat_history_0_300_two_people.txt",
+                "./data/train_ip_vcg_reelshort_0_200.txt",
             ]
 
         if self.ani_picture: #and not self.do_only_cloth:
             plist += [
-                "/mnt/wangxuekuan/code/layout/dataset_split/danbooru_anime.txt",
-                "/mnt/wangxuekuan/code/layout/dataset_split/flux_anime_1character.txt",
-                "/mnt/wangxuekuan/code/layout/dataset_split/flux_anime_2characters.txt",
-                "/mnt2/wangxuekuan/code/x-flux.bk/data/ip_adapter/anime_pictures_46w.txt",
-                "/mnt2/wangxuekuan/code/x-flux.bk/data/ip_adapter/tuchong.txt",
+                "./data/danbooru_anime.txt",
+                "./data/flux_anime_1character.txt",
+                "./data/flux_anime_2characters.txt",
+                "./data/anime_pictures_46w.txt",
+                "./data/tuchong.txt",
             ]
-
-        # plist += [
-        #     "/mnt2/wangxuekuan/code/x-flux.bk/data/ip_adapter/tuchong.txt",
-        # ]
-        
-        # plist += [
-        #     '/mnt2/zhenghaoyu/share/IGPair/IGPair_seperate/IGPair_cloth_pair.txt',
-        #     '/mnt2/zhenghaoyu/share/IGPair/IGPair_seperate/IGPair_cloth_pair.txt',
-        #     '/mnt2/zhenghaoyu/share/IGPair/IGPair_seperate/IGPair_cloth_pair.txt',
-        #     '/mnt2/zhenghaoyu/share/IGPair/IGPair_seperate/IGPair_cloth_pair.txt',
-        #     '/mnt2/zhenghaoyu/share/IGPair/IGPair_seperate/IGPair_cloth_pair.txt',
-        # ]
 
         self.data_tmp = []
         for p in plist:
@@ -342,438 +330,320 @@ class IpAdaptorImageDataset(Dataset):
             return self.__getitem__(random.randint(0, len(self.data) - 1))
         try:
         # if True:
-            n, json_path, image_file = self.data[idx].strip().split(", ")
+            _, json_path, image_file = self.data[idx].strip().split(", ")
+            do_box_only = False
+            # if self.genal_caption_flag:
+            ftype = image_file.split(".")[-1]
+            caption_path = image_file[:-len(ftype)].replace("/img/", "/caption/") + "txt"
+            if not os.path.exists(caption_path):
+                print("no caption path", caption_path)
+                self.error_idx.append(idx)
+                return self.__getitem__(random.randint(0, len(self.data) - 1))
+
+            prompt = open(caption_path, "r").readlines()[0].strip()
+
+            mask_sapiens_path, skeleton_sapiens_path, mask_sam_path = get_sapiens_sam_path(json_path)
             
-            if 'IGPair' not in json_path:
-                do_box_only = False
-                # if self.genal_caption_flag:
-                ftype = image_file.split(".")[-1]
-                caption_path = "/mnt3/wangxuekuan/data/ip_adapter_gpt4o__desc/" + image_file[:-len(ftype)] + "txt"
-                if not os.path.exists(caption_path):
-                    print("no caption path", caption_path)
-                    self.error_idx.append(idx)
+            if "danbooru_anime" not in json_path and "anime_pictures" not in json_path:
+                if mask_sapiens_path is None or skeleton_sapiens_path is None or mask_sam_path is None:
                     return self.__getitem__(random.randint(0, len(self.data) - 1))
+            
+            if "danbooru_anime" in json_path or "anime_pictures" in json_path:
+                do_box_only = True
 
-                prompt = open(caption_path, "r").readlines()[0].strip()
+            # read json
 
-                mask_sapiens_path, skeleton_sapiens_path, mask_sam_path = get_sapiens_sam_path(json_path)
+            with open(json_path, 'r') as f:
+                info_dict = json.load(f)
                 
-                if "danbooru_anime" not in json_path and "anime_pictures" not in json_path:
-                    if mask_sapiens_path is None or skeleton_sapiens_path is None or mask_sam_path is None:
-                        return self.__getitem__(random.randint(0, len(self.data) - 1))
+            raw_image = Image.open(image_file).convert("RGB")
+            raw_size = raw_image.size
+
+            # if self.target_size[0] == -1:
+            new_w, new_h = get_new_size(raw_image, self.max_side_len)
+            # print(raw_size, new_w, new_h)
+            self.target_size = (new_w // 16 * 16, new_h // 16 * 16)
+
+            # init mask image
+            hint_mask_image = np.array(copy.deepcopy(raw_image))
+            hint_mask = np.ones_like(hint_mask_image)
+            
+            # control image
+            hint_skeleton = gen_control_image(raw_image, json_path, image_file, skeleton_sapiens_path, mask_sapiens_path)
+
+            #image = cropped_image.convert("RGB").resize(self.size)
+            ### == > list 
+            # 读取bbox信息
+            face_image_list = []
+            ip_atten_mask_list = []
+            face_box_list = []
+            body_bbox = []
+
+            # 每次选择一个脸
+            seg_tmp_list = []
+            face_idx = []
+            idx = 0
+            for seg in info_dict['segments']:
+                if "face_bbox" in list(seg.keys()):
+                    if seg["face_bbox"] != None:
+                        if (seg["face_bbox"][3] - seg["face_bbox"][1]) * (seg["face_bbox"][2] - seg["face_bbox"][0]) / (raw_size[0] * raw_size[1]) > self.face_min_area:
+                        # if seg["face_bbox"][3] - seg["face_bbox"][1] > 48 and seg["face_bbox"][2] - seg["face_bbox"][0] > 48:
+                            seg_tmp_list.append(seg)
+                            face_idx.append(idx)
+                        idx += 1
+            
+            if len(seg_tmp_list) == 1 and self.ip_number == 1:
+                choice_idx = random.choice([i for i in range(len(seg_tmp_list))])
+                seg_all = [seg_tmp_list[choice_idx]]
+                face_embedding_idx = face_idx[choice_idx]
+            else:
+                print("small - data")
+                self.error_idx.append(idx)
+                return self.__getitem__(random.randint(0, len(self.data) - 1))
+            
+            for seg in seg_all:
+                # 读取face box 和 对应的 attention box （feature 注入）
+                face_bbox = np.array(seg["face_bbox"])
                 
-                if "danbooru_anime" in json_path or "anime_pictures" in json_path:
-                    do_box_only = True
+                # 提取脸部的embedding
+                face_image_tmp = raw_image.crop(face_bbox)
+                face_image_tmp = np.array(face_image_tmp)
+                # print(face_image_tmp.shape)
+                if True:
+                    # 读取face embedding 特征
+                    face_embedding_path = json_path.replace("json_final/", "face_embedding/").replace(".json", ".npz")
+                    face_embedding_path = face_embedding_path.replace("json_w_face/",  "face_embedding/")
+                    face_embedding_path = face_embedding_path.replace("json_w_face_body/",  "face_embedding/")
 
-                # read json
-                new_json_path = json_path.replace("/mnt2/wangxuekuan/data/MSDBv2_json/mnt/wangxuekuan/data/vcg_images_122W_1_v3_format_simple_skeleton/", \
-                                                "/mnt2/huangyuqiu/share/vcg_images_122W_1/json_final_v2/")
-
-                with open(new_json_path, 'r') as f:
-                    info_dict = json.load(f)
-                    
-                raw_image = Image.open(image_file).convert("RGB")
-                raw_size = raw_image.size
-
-                # if self.target_size[0] == -1:
-                new_w, new_h = get_new_size(raw_image, self.max_side_len)
-                # print(raw_size, new_w, new_h)
-                self.target_size = (new_w // 16 * 16, new_h // 16 * 16)
-
-                # init mask image
-                hint_mask_image = np.array(copy.deepcopy(raw_image))
-                hint_mask = np.ones_like(hint_mask_image)
-                
-                # control image
-                hint_skeleton = gen_control_image(raw_image, json_path, image_file, skeleton_sapiens_path, mask_sapiens_path)
-
-                #image = cropped_image.convert("RGB").resize(self.size)
-                ### == > list 
-                # 读取bbox信息
-                face_image_list = []
-                ip_atten_mask_list = []
-                face_box_list = []
-                body_bbox = []
-
-                # 每次选择一个脸
-                seg_tmp_list = []
-                face_idx = []
-                idx = 0
-                for seg in info_dict['segments']:
-                    if "face_bbox" in list(seg.keys()):
-                        if seg["face_bbox"] != None:
-                            if (seg["face_bbox"][3] - seg["face_bbox"][1]) * (seg["face_bbox"][2] - seg["face_bbox"][0]) / (raw_size[0] * raw_size[1]) > self.face_min_area:
-                            # if seg["face_bbox"][3] - seg["face_bbox"][1] > 48 and seg["face_bbox"][2] - seg["face_bbox"][0] > 48:
-                                seg_tmp_list.append(seg)
-                                face_idx.append(idx)
-                            idx += 1
-                
-                if len(seg_tmp_list) == 1 and self.ip_number == 1:
-                    choice_idx = random.choice([i for i in range(len(seg_tmp_list))])
-                    seg_all = [seg_tmp_list[choice_idx]]
-                    face_embedding_idx = face_idx[choice_idx]
-                else:
-                    print("small - data")
-                    self.error_idx.append(idx)
-                    return self.__getitem__(random.randint(0, len(self.data) - 1))
-                
-                for seg in seg_all:
-                    # 读取face box 和 对应的 attention box （feature 注入）
-                    face_bbox = np.array(seg["face_bbox"])
-                    
-                    # 提取脸部的embedding
-                    face_image_tmp = raw_image.crop(face_bbox)
-                    face_image_tmp = np.array(face_image_tmp)
-                    # print(face_image_tmp.shape)
-                    if True:
-                        # 读取face embedding 特征
-                        face_embedding_path = json_path.replace("/mnt2/wangxuekuan/data/MSDBv2_json/mnt/wangxuekuan/data/vcg_images_122W_1_v3_format_simple_skeleton/", \
-                                                                "/mnt2/huangyuqiu/share/vcg_images_122W_1/face_embedding_wxk/").replace(".json", ".npz")
-                        
-                        try:
-                            if not os.path.exists(face_embedding_path):
-                                face_embedding = np.zeros(512)
-                            else:
-                                loaded_sparse_mask = scipy.sparse.load_npz(face_embedding_path)
-                                face_embedding = loaded_sparse_mask.toarray()[face_embedding_idx]
-                                face_embedding = torch.from_numpy(face_embedding)
-                        except:
+                    try:
+                        if not os.path.exists(face_embedding_path):
                             face_embedding = np.zeros(512)
-
-                        # 计算另一个
-                        # 
-                        if self.face_align:
-                            if "face_kps" in list(seg.keys()) and random.random() > 0.5:
-                                lmk = np.array(seg['face_kps'])
-                                origin_w, origin_h = info_dict['image_size']['w'], info_dict['image_size']['h']
-                                now_w, now_h = raw_image.size
-                                ratio = min(origin_w/now_w, origin_h/now_h)
-                                lmk = lmk / ratio
-                                # t = time.time()
-                                # cv2.imwrite(f"test/face_image_tmp_1_{t}.jpg", face_image_tmp)
-                                face_image_tmp = face_align.norm_crop(np.array(raw_image), landmark=lmk, image_size=224)
-                                # print("align face 50%")
-                                # cv2.imwrite(f"test/face_image_tmp_2_{t}.jpg", face_image_tmp)
-                            else:
-                                print("no face_kps", json_path)
-
-                        face_image_tmp = cv2.resize(face_image_tmp, (112, 112))
-                        face_image_tmp = torch.from_numpy(face_image_tmp).permute(2, 0, 1) / 255.0
-
-                        # OPENAI_DATASET_MEAN = torch.tensor([0.48145466, 0.4578275, 0.40821073]).reshape(-1, 1, 1)
-                        # OPENAI_DATASET_STD = torch.tensor([0.26862954, 0.26130258, 0.27577711]).reshape(-1, 1, 1)
-
-                        # print()
-                        # print("face_image_tmp", face_image_tmp.shape, face_image_tmp.max(), face_image_tmp.min())
-
-                        # facerecog_image = face_image_tmp * OPENAI_DATASET_STD + OPENAI_DATASET_MEAN  # [0, 1]
-                        facerecog_image = torch.clamp((face_image_tmp  * 2) - 1, -1, 1)  # [-1, 1]
-                        # facerecog_image = F.interpolate(facerecog_image, size=(112, 112), mode="bilinear", align_corners=False)
-                    
-                        # print("facerecog_image", facerecog_image.shape, facerecog_image.max(), facerecog_image.min())
-
-
-                        # 调用识别模型
-                        # face_embedding_circular = facerecog_model(facerecog_image, return_mid_feats=True)[0].to(device, dtype)
-
-                        # face_embedding_circular = drop_embeddings(face_embedding_circular, drop_image_embeds).to(image_embeds.device, image_embeds.dtype)
-                        # face_embedding = face_recognition.face_encodings(face_image_tmp)[0]
-                        # print(face_image_tmp.shape, face_embedding.shape)
-                    # except:
-                    #     # print("error:", face_image_tmp.shape)
-                    #     face_embedding = np.zeros(512)
-                    
-                    if random.random() > 0.5 and self.face_pad:
-                        face_bbox = pad_bbox(face_bbox)     # 正方形
-                    atten_box = face_bbox
-
-                    template_id = None
-                    if "template_id" in seg.keys():
-                        template_id = seg["template_id"]
-
-                    expansion_factor = random.choice([1.0, 1.0, random.uniform(1.0, 1.8)])
-                    face_bbox = expand_bbox(raw_image, face_bbox, expansion_factor)
-                    face_bbox[face_bbox<0] = 0
-                    
-                    # 计算头发和脸的mask
-                    all_mask = None #np.ones_like()
-                    face_type = "box"
-                    face_mask = None
-                    hair_type = False
-                    drag_flag = False
-                    cloth_type = False
-                    
-                    left_arm_flag = random.choice([True, False])
-                    right_arm_flag = random.choice([True, False])
-                    left_leg_flag = random.choice([True, False])
-                    right_leg_flag = random.choice([True, False])
-                    torso_flag = random.choice([True, False])
-
-                    
-                    if self.atten_mask_type == "face_hair" and not do_box_only:
-                        if self.have_cloth:
-                            # print("have_cloth:", self.have_cloth,  "==>")
-                            cloth_type = random.choice([True, True, False])
                         else:
+                            loaded_sparse_mask = scipy.sparse.load_npz(face_embedding_path)
+                            face_embedding = loaded_sparse_mask.toarray()[face_embedding_idx]
+                            face_embedding = torch.from_numpy(face_embedding)
+                    except:
+                        face_embedding = np.zeros(512)
+
+                    # 计算另一个
+                    # 
+                    if self.face_align:
+                        if "face_kps" in list(seg.keys()) and random.random() > 0.5:
+                            lmk = np.array(seg['face_kps'])
+                            origin_w, origin_h = info_dict['image_size']['w'], info_dict['image_size']['h']
+                            now_w, now_h = raw_image.size
+                            ratio = min(origin_w/now_w, origin_h/now_h)
+                            lmk = lmk / ratio
+                            # t = time.time()
+                            # cv2.imwrite(f"test/face_image_tmp_1_{t}.jpg", face_image_tmp)
+                            face_image_tmp = face_align.norm_crop(np.array(raw_image), landmark=lmk, image_size=224)
+                            # print("align face 50%")
+                            # cv2.imwrite(f"test/face_image_tmp_2_{t}.jpg", face_image_tmp)
+                        else:
+                            print("no face_kps", json_path)
+
+                    face_image_tmp = cv2.resize(face_image_tmp, (112, 112))
+                    face_image_tmp = torch.from_numpy(face_image_tmp).permute(2, 0, 1) / 255.0
+                    facerecog_image = torch.clamp((face_image_tmp  * 2) - 1, -1, 1)  # [-1, 1]
+  
+                
+                if random.random() > 0.5 and self.face_pad:
+                    face_bbox = pad_bbox(face_bbox)     # 正方形
+                atten_box = face_bbox
+
+                template_id = None
+                if "template_id" in seg.keys():
+                    template_id = seg["template_id"]
+
+                expansion_factor = random.choice([1.0, 1.0, random.uniform(1.0, 1.8)])
+                face_bbox = expand_bbox(raw_image, face_bbox, expansion_factor)
+                face_bbox[face_bbox<0] = 0
+                
+                # 计算头发和脸的mask
+                all_mask = None #np.ones_like()
+                face_type = "box"
+                face_mask = None
+                hair_type = False
+                drag_flag = False
+                cloth_type = False
+                
+                left_arm_flag = random.choice([True, False])
+                right_arm_flag = random.choice([True, False])
+                left_leg_flag = random.choice([True, False])
+                right_leg_flag = random.choice([True, False])
+                torso_flag = random.choice([True, False])
+
+                
+                if self.atten_mask_type == "face_hair" and not do_box_only:
+                    if self.have_cloth:
+                        # print("have_cloth:", self.have_cloth,  "==>")
+                        cloth_type = random.choice([True, True, False])
+                    else:
+                        cloth_type = False
+                    
+                    if self.do_only_cloth:
+                        cloth_type = True
+
+                    face_type = random.choice(["box", "mask"])
+                    hair_type = random.choice([True, False])
+                    
+                    face_mask, hair_mask, cloth_mask, body_mask, mask_info = \
+                        get_per_mask_region(mask_sapiens_path, mask_sam_path, int(seg['id']), left_arm_flag, right_arm_flag, left_leg_flag, right_leg_flag, torso_flag)
+
+                    face_mask = fill_mask(face_mask)
+                    hair_mask = fill_mask(hair_mask)
+                    cloth_mask = fill_mask(cloth_mask)
+                    body_mask = fill_mask(body_mask)
+                    
+                    if cloth_type and cloth_mask is not None:
+                        cloth_mask_sum = cloth_mask.sum()
+                        if cloth_mask_sum < (seg['bbox'][3] - seg['bbox'][1]) * (seg['bbox'][2] - seg['bbox'][0]) * 0.3:
                             cloth_type = False
-                        
-                        if self.do_only_cloth:
-                            cloth_type = True
+                        else:
+                            hair_type = False
+                            face_mask = cloth_mask
+                            face_type = "mask"
+                    else:
+                        print("XXXX ==> cloth_type:", cloth_type, ", +++>>", cloth_mask == None)
+                        cloth_type = False
 
-                        face_type = random.choice(["box", "mask"])
-                        hair_type = random.choice([True, False])
-                        
-                        face_mask, hair_mask, cloth_mask, body_mask, mask_info = \
-                            get_per_mask_region(mask_sapiens_path, mask_sam_path, int(seg['id']), left_arm_flag, right_arm_flag, left_leg_flag, right_leg_flag, torso_flag)
+                    if face_mask is None:
+                        drag_flag = True
+                    else:
+                        face_bbox, all_mask, drag_flag  = update_face_box_by_mask(face_bbox, face_mask, hair_mask, face_type, hair_type, cloth_type)
+                        body_mask = body_mask.astype(bool)
 
+                face_image = raw_image.crop(face_bbox)
+
+                protrait_flag = False
+                if random.random() > 1.0 and cloth_type == False:
+                    protrait_bbox = None
+                    if face_type == "box" and "vcg_122w" in json_path:
+                        portrait_path = json_path.replace("json_final/", "img_liveportrait")[:-5]
+                        if os.path.exists(portrait_path):
+                            protrait_imgs = glob.glob(portrait_path + "/*.jpg")
+                            if len(protrait_imgs) != 0:
+                                protrait_img_path = random.choice(protrait_imgs)
+                                protrait_img = Image.open(protrait_img_path)
+                                protrait_bbox_path = protrait_img_path.replace("img_liveportrait", "liveportrait_json_w_face").replace(".jpg", ".json")
+                                if os.path.exists(protrait_bbox_path):
+                                    with open(protrait_bbox_path, "r") as f:
+                                        protrait_info_dict = json.load(f)
+                                        if len(protrait_info_dict['segments']) != 0:
+                                            protrait_bbox = protrait_info_dict['segments'][seg['id']]['face_bbox']
+                                            expansion_factor = random.choice([1.0, 1.0, random.uniform(1.0, 1.2)])
+                                            protrait_bbox = expand_bbox(protrait_img, protrait_bbox, 1.0)
+                    # 裁剪人脸区域
+                    if protrait_bbox is not None:
+                        if protrait_bbox[2] - protrait_bbox[0] > 64 and protrait_bbox[3] - protrait_bbox[1] > 64:
+                            # face_bbox = protrait_bbox.tolist()
+                            protrait_flag = True
+                            face_image = protrait_img.crop(protrait_bbox)
+                            face_type = "box"
+
+                tuchong_flag = False
+                if random.random() > 0.5 and "tuchong" in json_path and cloth_type==False:
+                    #随机替换其他的图片中的ref image
+                    json_folder_path = os.path.dirname(json_path)
+                    json_all_list = glob.glob(json_folder_path + "/*.json")
+                    random.shuffle(json_all_list)
+
+                    for json_path in json_all_list:
+                        if not tuchong_flag:
+                            with open(json_path, 'r') as file:
+                                new_data = json.load(file)
+                                for ss in new_data["segments"]:
+                                    if ss["template_id"] == template_id:
+                                        face_bbox_new = ss["face_bbox"]
+                                        if face_bbox_new[2] - face_bbox_new[0] > 64 and face_bbox_new[3] - face_bbox_new[1] > 64:
+                                            face_bbox_crop = face_bbox_new
+                                            if random.random() > 0.5 and self.face_pad:
+                                                face_bbox_crop = pad_bbox(face_bbox_crop)     # 正方形
+                                            
+                                            expansion_factor = random.choice([1.0, 1.0, random.uniform(1.0, 1.8)])
+                                            face_bbox_crop = expand_bbox(raw_image, face_bbox_crop, expansion_factor)
+                                            face_bbox_crop[face_bbox_crop<0] = 0
+                                            # print("do face bbox crop", face_bbox_crop)
+                                            tuchong_flag = True
+                                            # json
+                                            tuchong_img_path = json_path.replace(".json", ".jpeg").replace("json_new", "img")
+                                            tuchong_img = Image.open(tuchong_img_path)
+                                            face_image = tuchong_img.crop(face_bbox_crop)
+                                            print("tuchong face crop", face_bbox_crop)
+                                            break
+
+                # 根据mask对face_image填充噪声
+                if random.random() > 0.5 and protrait_flag is False:
+                    if face_mask is None:
+                        face_mask, hair_mask, cloth_mask, body_mask, mask_info = get_per_mask_region(mask_sapiens_path, mask_sam_path, int(seg['id']), left_arm_flag, right_arm_flag, left_leg_flag, right_leg_flag, torso_flag)
                         face_mask = fill_mask(face_mask)
                         hair_mask = fill_mask(hair_mask)
                         cloth_mask = fill_mask(cloth_mask)
                         body_mask = fill_mask(body_mask)
-                        
-                        if cloth_type and cloth_mask is not None:
-                            cloth_mask_sum = cloth_mask.sum()
-                            if cloth_mask_sum < (seg['bbox'][3] - seg['bbox'][1]) * (seg['bbox'][2] - seg['bbox'][0]) * 0.3:
-                                cloth_type = False
-                            else:
-                                hair_type = False
-                                face_mask = cloth_mask
-                                face_type = "mask"
-                        else:
-                            print("XXXX ==> cloth_type:", cloth_type, ", +++>>", cloth_mask == None)
-                            cloth_type = False
 
-                        if face_mask is None:
-                            drag_flag = True
-                        else:
-                            face_bbox, all_mask, drag_flag  = update_face_box_by_mask(face_bbox, face_mask, hair_mask, face_type, hair_type, cloth_type)
-                            body_mask = body_mask.astype(bool)
+                    if face_mask is not None:
+                        face_image = fill_image_noise(face_image, face_mask, hair_mask, face_bbox, hair_type)
 
-                    face_image = raw_image.crop(face_bbox)
+                face_image_list.append(face_image)
 
-                    protrait_flag = False
-                    if random.random() > 1.0 and cloth_type == False:
-                        protrait_bbox = None
-                        if face_type == "box" and "vcg_images_122W_1" in json_path:
-                            portrait_path = json_path.replace("/mnt2/wangxuekuan/data/MSDBv2_json/mnt/wangxuekuan/data/vcg_images_122W_1_v3_format_simple_skeleton", 
-                                                            "/mnt2/huangyuqiu/share/vcg_images_122W_1/img_liveportrait")[:-5]
-                            if os.path.exists(portrait_path):
-                                protrait_imgs = glob.glob(portrait_path + "/*.jpg")
-                                if len(protrait_imgs) != 0:
-                                    protrait_img_path = random.choice(protrait_imgs)
-                                    protrait_img = Image.open(protrait_img_path)
-                                    protrait_bbox_path = protrait_img_path.replace("/vcg_images_122W_1/img_liveportrait", "/vcg_images_122W_1_liveportrait/json_w_face").replace(".jpg", ".json")
-                                    if os.path.exists(protrait_bbox_path):
-                                        with open(protrait_bbox_path, "r") as f:
-                                            protrait_info_dict = json.load(f)
-                                            if len(protrait_info_dict['segments']) != 0:
-                                                protrait_bbox = protrait_info_dict['segments'][seg['id']]['face_bbox']
-                                                expansion_factor = random.choice([1.0, 1.0, random.uniform(1.0, 1.2)])
-                                                protrait_bbox = expand_bbox(protrait_img, protrait_bbox, 1.0)
-                        # 裁剪人脸区域
-                        if protrait_bbox is not None:
-                            if protrait_bbox[2] - protrait_bbox[0] > 64 and protrait_bbox[3] - protrait_bbox[1] > 64:
-                                # face_bbox = protrait_bbox.tolist()
-                                protrait_flag = True
-                                face_image = protrait_img.crop(protrait_bbox)
-                                face_type = "box"
-
-                    tuchong_flag = False
-                    if random.random() > 0.5 and "tuchong" in json_path and cloth_type==False:
-                        #随机替换其他的图片中的ref image
-                        json_folder_path = os.path.dirname(json_path)
-                        json_all_list = glob.glob(json_folder_path + "/*.json")
-                        random.shuffle(json_all_list)
-                        # print(json_all_list)
-                        
-                        for new_json_path in json_all_list:
-                            if new_json_path != json_path and not tuchong_flag:
-                                # print(new_json_path)
-                                with open(new_json_path, 'r') as file:
-                                    new_data = json.load(file)
-                                    for ss in new_data["segments"]:
-                                        if ss["template_id"] == template_id:
-                                            face_bbox_new = ss["face_bbox"]
-                                            if face_bbox_new[2] - face_bbox_new[0] > 64 and face_bbox_new[3] - face_bbox_new[1] > 64:
-                                                face_bbox_crop = face_bbox_new
-                                                if random.random() > 0.5 and self.face_pad:
-                                                    face_bbox_crop = pad_bbox(face_bbox_crop)     # 正方形
-                                                
-                                                expansion_factor = random.choice([1.0, 1.0, random.uniform(1.0, 1.8)])
-                                                face_bbox_crop = expand_bbox(raw_image, face_bbox_crop, expansion_factor)
-                                                face_bbox_crop[face_bbox_crop<0] = 0
-                                                # print("do face bbox crop", face_bbox_crop)
-                                                tuchong_flag = True
-                                                # json
-                                                tuchong_img_path = new_json_path.replace(".json", ".jpeg").replace("json_new", "img")
-                                                tuchong_img = Image.open(tuchong_img_path)
-                                                face_image = tuchong_img.crop(face_bbox_crop)
-                                                print("tuchong face crop", face_bbox_crop)
-                                                break
-
-                    # 根据mask对face_image填充噪声
-                    if random.random() > 0.5 and protrait_flag is False:
-                        if face_mask is None:
-                            face_mask, hair_mask, cloth_mask, body_mask, mask_info = get_per_mask_region(mask_sapiens_path, mask_sam_path, int(seg['id']), left_arm_flag, right_arm_flag, left_leg_flag, right_leg_flag, torso_flag)
-                            face_mask = fill_mask(face_mask)
-                            hair_mask = fill_mask(hair_mask)
-                            cloth_mask = fill_mask(cloth_mask)
-                            body_mask = fill_mask(body_mask)
-
-                        if face_mask is not None:
-                            face_image = fill_image_noise(face_image, face_mask, hair_mask, face_bbox, hair_type)
-
-                    face_image_list.append(face_image)
-
-                    if face_mask is None or all_mask is None:
-                        face_type = "box"
-                    
-                    # 计算注入区域
-                    # if self.atten_mask_type == "face_hair":
-                        # 是否注入头发
-                        # if hair_type is False:
-                        #     hair_type = random.choice([True, False])
-                        # if mask_info is not None and drop_tag is False:
-                        #     face_bbox, all_mask, drag_flag  = update_face_box_by_mask(face_bbox, face_mask, hair_mask, face_type, hair_type, cloth_type)
-                        # 
-
-                    ip_atten_mask = np.zeros((raw_size[1], raw_size[0]))
-                    if self.atten_mask_type == "face_hair" and face_type == "mask" and not do_box_only:
-                        # 膨胀一下
-                    
-                        all_mask = fill_mask(all_mask)
-                        all_mask = mask_aug(all_mask, aug_type="dilate_small")
-                        
-                        temp_box = calculate_mask_external_rectangle(all_mask)    # todo debug None
-                        face_box_list.append(temp_box)
-                        
-                        # 随机替换cloth mask 为boy-mask
-                        if random.random() > 0.5:
-                            all_mask = fill_mask(body_mask)  
-                        
-                        if random.random() > 0.5:
-                            hint_mask_image[all_mask] = 0
-                            hint_mask[all_mask] = 0
-                        else:
-                            temp_box_mask = calculate_mask_external_rectangle(all_mask)
-                            hint_mask_image[temp_box_mask[1]:temp_box_mask[3], temp_box_mask[0]:temp_box_mask[2]] = 0
-                            hint_mask[temp_box_mask[1]:temp_box_mask[3], temp_box_mask[0]:temp_box_mask[2]] = 0
-
-                        # 随机更新为box
-                        all_mask = mask_aug(all_mask, aug_type="dilate")
-                        if random.random() > 0.5:
-                            ip_atten_mask[all_mask] = 1
-                        else:
-                            temp_box_mask = calculate_mask_external_rectangle(all_mask)
-                            ip_atten_mask[temp_box_mask[1]:temp_box_mask[3], temp_box_mask[0]:temp_box_mask[2]] = 1
-
-                    else:
-                        atten_box = face_bbox
-                        expansion_factor = random.choice([1.0, 1.0, random.uniform(1.0, 1.2)])
-                        atten_box = expand_bbox(raw_image, atten_box, expansion_factor)
-                        atten_box[atten_box<0] = 0
-
-                        ip_atten_mask[atten_box[1]:atten_box[3], atten_box[0]:atten_box[2]] = 1
-                        hint_mask_image[atten_box[1]:atten_box[3], atten_box[0]:atten_box[2]] = 0
-                        hint_mask[atten_box[1]:atten_box[3], atten_box[0]:atten_box[2]] = 0
-
-                        face_box_list.append(atten_box)
-                    
-                    ip_atten_mask_small = cv2.resize(ip_atten_mask, (self.target_size[0]//16, self.target_size[1]//16))
-                    ip_atten_mask_list.append(ip_atten_mask_small)
-            
-            else:
-            # if True:
-                print("Got IGpair!")
-                cloth_img_path = json_path
-                witch_cloth_type = image_file.split(".")[0][-1]
-                if witch_cloth_type != '0' and witch_cloth_type != '1':
-                    print("cloth type error", image_file)
-                    self.error_idx.append(idx)
-                    return self.__getitem__(random.randint(0, len(self.data) - 1))
-                original_img_path = image_file.split('_cloth')[0].replace('images_pair', 'images') + ".jpg"
-                mask_path = original_img_path.replace('images', 'mask_sapiens').replace('.png', '.jpg').replace('.jpg', '_seg.npz')
-                skeleton_path = original_img_path.replace('images', 'skeleton').replace('.png', '.jpg').replace('.jpg', '.json')
-                original_img_path_list = original_img_path.split("/")
-                original_img_path = os.path.join("/mnt2/shuiyunhao/data/IGPair/IGPair_seperate", original_img_path_list[-2], "IGPair/images", original_img_path_list[-1])
-                ftype = original_img_path.split(".")[-1]
-                caption_path = "/mnt3/wangxuekuan/data/ip_adapter_gpt4o__desc/" + original_img_path[:-len(ftype)] + "txt"
+                if face_mask is None or all_mask is None:
+                    face_type = "box"
                 
-                if not os.path.exists(caption_path):
-                    print("no caption path", caption_path)
-                    self.error_idx.append(idx)
-                    return self.__getitem__(random.randint(0, len(self.data) - 1))
+                # 计算注入区域
+                # if self.atten_mask_type == "face_hair":
+                    # 是否注入头发
+                    # if hair_type is False:
+                    #     hair_type = random.choice([True, False])
+                    # if mask_info is not None and drop_tag is False:
+                    #     face_bbox, all_mask, drag_flag  = update_face_box_by_mask(face_bbox, face_mask, hair_mask, face_type, hair_type, cloth_type)
+                    # 
 
-                prompt = open(caption_path, "r").readlines()[0].strip()
-                
-                if not os.path.exists(mask_path):
-                    print(f'{mask_path} not exists')
-                    self.error_idx.append(idx)
-                    return self.__getitem__(random.randint(0, len(self.data) - 1))
-                
-                seg_data = scipy.sparse.load_npz(mask_path).toarray()
-                if witch_cloth_type == '0':
-                    cloth_mask = seg_data == 22
-                    if random.random() > 0.5:
-                        for xxxx in [5, 6, 10]:
-                            cloth_mask = np.logical_or(cloth_mask, seg_data == xxxx)
-                    if random.random() > 0.5:
-                        for xxxx in [14, 15, 19]:
-                            cloth_mask = np.logical_or(cloth_mask, seg_data == xxxx)
-                    if random.random() > 0.5:
-                        cloth_mask = np.logical_or(cloth_mask, seg_data == 21)
-                else:
-                    cloth_mask = seg_data == 12
-                    if random.random() > 0.5:
-                        for xxxx in [4, 7, 11]:
-                            cloth_mask = np.logical_or(cloth_mask, seg_data == xxxx)
-                    if random.random() > 0.5:
-                        for xxxx in [13, 16, 20]:
-                            cloth_mask = np.logical_or(cloth_mask, seg_data == xxxx)
-                    
-                raw_image = Image.open(image_file).convert("RGB")
-                raw_size = raw_image.size
-
-                # if self.target_size[0] == -1:
-                new_w, new_h = get_new_size(raw_image, self.max_side_len)
-                # print(raw_size, new_w, new_h)
-                self.target_size = (new_w // 16 * 16, new_h // 16 * 16)
-
-                # init mask image
-                hint_mask_image = np.array(copy.deepcopy(raw_image))
-                hint_mask = np.ones_like(hint_mask_image)
-                
-                # control image
-                hint_skeleton = gen_control_image(raw_image, json_path, image_file, skeleton_path, mask_path)
-                
-                reference_image = Image.open(cloth_img_path)
-                face_image_list = [reference_image]
-                face_box = calculate_mask_external_rectangle(cloth_mask)
-                face_box_list = [face_box]
-                cloth_type = True
                 ip_atten_mask = np.zeros((raw_size[1], raw_size[0]))
-                if random.random() > 0.5:
-                    ip_atten_mask[face_box[1]:face_box[3], face_box[0]:face_box[2]] = 1
-                    hint_mask_image[face_box[1]:face_box[3], face_box[0]:face_box[2]] = 0
-                    hint_mask[face_box[1]:face_box[3], face_box[0]:face_box[2]] = 0
-                else:
-                    all_mask = fill_mask(cloth_mask)
-                    all_mask = mask_aug(all_mask, aug_type="dilate_small")
-                    ip_atten_mask[all_mask] = 1
-                    hint_mask_image[all_mask] = 0
-                    hint_mask[all_mask] = 0
-                    
-                # cv2.imwrite(f"test/{datetime.now().strftime('%Y%m%d_%H%M%S')}_hint_mask_image.jpg", hint_mask_image)
-                # cv2.imwrite(f"test/{datetime.now().strftime('%Y%m%d_%H%M%S')}_hint_skeleton.jpg", hint_skeleton)
-                # raw_image.save(f"test/{datetime.now().strftime('%Y%m%d_%H%M%S')}_raw_image.jpg")
-                # reference_image.save(f"test/{datetime.now().strftime('%Y%m%d_%H%M%S')}_reference_image.jpg")
-                    
-                ip_atten_mask_small = cv2.resize(ip_atten_mask, (self.target_size[0]//16, self.target_size[1]//16))
-                ip_atten_mask_list = []
-                ip_atten_mask_list.append(ip_atten_mask_small)
+                if self.atten_mask_type == "face_hair" and face_type == "mask" and not do_box_only:
+                    # 膨胀一下
                 
-                face_embedding = np.zeros(512)
-                facerecog_image = np.array(raw_image)
+                    all_mask = fill_mask(all_mask)
+                    all_mask = mask_aug(all_mask, aug_type="dilate_small")
+                    
+                    temp_box = calculate_mask_external_rectangle(all_mask)    # todo debug None
+                    face_box_list.append(temp_box)
+                    
+                    # 随机替换cloth mask 为boy-mask
+                    if random.random() > 0.5:
+                        all_mask = fill_mask(body_mask)  
+                    
+                    if random.random() > 0.5:
+                        hint_mask_image[all_mask] = 0
+                        hint_mask[all_mask] = 0
+                    else:
+                        temp_box_mask = calculate_mask_external_rectangle(all_mask)
+                        hint_mask_image[temp_box_mask[1]:temp_box_mask[3], temp_box_mask[0]:temp_box_mask[2]] = 0
+                        hint_mask[temp_box_mask[1]:temp_box_mask[3], temp_box_mask[0]:temp_box_mask[2]] = 0
+
+                    # 随机更新为box
+                    all_mask = mask_aug(all_mask, aug_type="dilate")
+                    if random.random() > 0.5:
+                        ip_atten_mask[all_mask] = 1
+                    else:
+                        temp_box_mask = calculate_mask_external_rectangle(all_mask)
+                        ip_atten_mask[temp_box_mask[1]:temp_box_mask[3], temp_box_mask[0]:temp_box_mask[2]] = 1
+
+                else:
+                    atten_box = face_bbox
+                    expansion_factor = random.choice([1.0, 1.0, random.uniform(1.0, 1.2)])
+                    atten_box = expand_bbox(raw_image, atten_box, expansion_factor)
+                    atten_box[atten_box<0] = 0
+
+                    ip_atten_mask[atten_box[1]:atten_box[3], atten_box[0]:atten_box[2]] = 1
+                    hint_mask_image[atten_box[1]:atten_box[3], atten_box[0]:atten_box[2]] = 0
+                    hint_mask[atten_box[1]:atten_box[3], atten_box[0]:atten_box[2]] = 0
+
+                    face_box_list.append(atten_box)
+                
+                ip_atten_mask_small = cv2.resize(ip_atten_mask, (self.target_size[0]//16, self.target_size[1]//16))
+                ip_atten_mask_list.append(ip_atten_mask_small)
+            
+
                 
             '''
             # 统一尺寸为16的倍数 + 随机drop prompt
