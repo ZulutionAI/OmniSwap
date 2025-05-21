@@ -27,7 +27,7 @@ cd data_process
 
 启动示例：
 
-python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
+```python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
 
 注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
 
@@ -39,11 +39,12 @@ python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
 
 ### Step3:Detect_skeleton
 
-入口 ./skeleton_detect.py
+入口 
+```./skeleton_detect.py```
 
 启动示例：
 
-python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
+```python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
 
 注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
 
@@ -55,11 +56,12 @@ python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
 
 ### Step3:face_parser(真人)
 
-入口 ./face_parse_real.py
+入口 
+```./face_parse_real.py```
 
 启动示例：
 
-python face_parse_real.py --dataset_root_path xxx 
+```python face_parse_real.py --dataset_root_path xxx```
 
 注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
 
@@ -71,23 +73,25 @@ python face_parse_real.py --dataset_root_path xxx
 
 ### Step4:sapiens_seg
 
-入口 ./sapiens/seg/seg.sh
+入口 
+```./sapiens/seg/seg.sh```
 
 需要修改其中的INPUT、OUTPUT、VALID_GPU_IDS
 
 启动示例：
 
-cd sapiens/seg && bash seg.sh
+```cd sapiens/seg && bash seg.sh```
 
 ### Step4:sapiens_skeleton
 
-入口 ./sapiens/pose/keypoints308.sh
+入口 
+```./sapiens/pose/keypoints308.sh```
 
 需要修改其中的INPUT、OUTPUT、VALID_GPU_IDS
 
 启动示例：
 
-cd sapiens/pose && bash keypoints308.sh
+```cd sapiens/pose && bash keypoints308.sh```
 
 ## 训练数据
 - vcg_122w [不含图片], 467725
@@ -238,7 +242,8 @@ dinov2_vitg14：https://pan.baidu.com/s/1cl1YPyvUFh24lL7P-ESZfg?pwd=wdrm 提取�
     `-- ip_adaptor_project.safetensors
 ```
 # 环境
-conda env create -f environment.yml
+
+```conda env create -f environment.yml```
 
 # 代码说明
 ## 训练
