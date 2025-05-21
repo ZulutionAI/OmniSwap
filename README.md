@@ -242,14 +242,18 @@ conda env create -f environment.yml
 
 # 代码说明
 ## 训练
+
 ```python3 train_flux_deepspeed_inpainting_ipa.py
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
     --config_file accelerate_deepspeed_bf16.yaml \
     --main_process_port 30090 \
     --num_processes 8 \
     train_flux_deepspeed_inpainting_ipa.py \
-    --config "train_configs/inpaint_cloth.yaml"```
+    --config "train_configs/inpaint_cloth.yaml"
+```
+
 ## 评测
+
 ```python3 valid_training.py```
 
 # 效果
