@@ -11,8 +11,8 @@ cd data_process
 
 启动示例：
 
-```python lang_sam.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
-```
+python lang_sam.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
+
 注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
 
 其余参数解析：
@@ -27,8 +27,7 @@ cd data_process
 
 启动示例：
 
-```python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
-```
+python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
 
 注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
 
@@ -44,8 +43,8 @@ cd data_process
 
 启动示例：
 
-```python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
-```
+python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7
+
 注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
 
 其余参数解析：
@@ -60,8 +59,8 @@ cd data_process
 
 启动示例：
 
-```python face_parse_real.py --dataset_root_path xxx 
-```
+python face_parse_real.py --dataset_root_path xxx 
+
 注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
 
 其余参数解析：
@@ -78,8 +77,8 @@ cd data_process
 
 启动示例：
 
-```cd sapiens/seg && bash seg.sh
-```
+cd sapiens/seg && bash seg.sh
+
 ### Step4:sapiens_skeleton
 
 入口 ./sapiens/pose/keypoints308.sh
@@ -88,8 +87,8 @@ cd data_process
 
 启动示例：
 
-```cd sapiens/pose && bash keypoints308.sh
-```
+cd sapiens/pose && bash keypoints308.sh
+
 ## 训练数据
 - vcg_122w [不含图片], 467725
   - https://pan.baidu.com/s/1tuy5hYuYh-k3FDtgp4Vrmw?pwd=yhew 提取码: yhew 
