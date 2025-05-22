@@ -19,14 +19,6 @@ cd data_process
 
 ```cd data_process & python face_parse_real.py --dataset_root_path xxx```
 
-- Notes​​:
-The dataset_root_path must contain an img folder with images (multi-level subdirectories allowed).
-
-- ​Parameters​​:
---total_segments: Number of segments to split the dataset into.
---which_segment: Index of the segment to process.
-
-
 ### Step4:sapiens_seg
 
 ```cd sapiens/seg && bash seg.sh```
@@ -37,6 +29,15 @@ Modify INPUT, OUTPUT, and VALID_GPU_IDS in the script.
 
 ```cd sapiens/pose && bash keypoints308.sh```
 Modify INPUT, OUTPUT, and VALID_GPU_IDS in the script.
+
+### Notes​​:
+The dataset_root_path must contain an img folder with images (multi-level subdirectories allowed).
+
+### ​Parameters​​:
+- total_segments: Number of segments to split the dataset into.
+- which_segment: Index of the segment to process.
+
+
 
 ## 训练数据
 - vcg_122w [no image], 467725
