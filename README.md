@@ -250,7 +250,9 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
 ![cloth-replace](./assets/cloth_replace.png)
 
 - face sweap
+1. case1
 ![face-replace](./assets/face_replace.png)
+2. case2
 ![face-replace](./assets/face_replace2.png)
 
 - face sweap + cloth try on
