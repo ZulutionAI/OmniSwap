@@ -1,123 +1,103 @@
-# 数据集
-
-## 数据处理pipeline
+# Dataset
+## Data Processing Pipeline
 
 cd data_process
 
 ### Step1:Lang_sam
-得到图片中人物的分割
 
-入口 ./lang_sam.py
+Obtain segmentation of characters in images.
 
-启动示例：
-
+Example command​​:
 ```python lang_sam.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
 
-注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
+Notes​​:
+The dataset_root_path must contain an img folder with images (multi-level subdirectories allowed).
 
-其余参数解析：
-
---total_segments 将整个数据集切分为几片
-
---which_segment 当前处理第几片数据集
+​​Parameters​​:
+--total_segments: Number of segments to split the dataset into.
+--which_segment: Index of the segment to process.
 
 ### Step2:Detect_skeleton
 
-入口 ./skeleton_detect.py
-
-启动示例：
+Example command​​:
 
 ```python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
 
-注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
+Notes​​:
+The dataset_root_path must contain an img folder with images (multi-level subdirectories allowed).
 
-其余参数解析：
-
---total_segments 将整个数据集切分为几片
-
---which_segment 当前处理第几片数据集
+​​Parameters​​:
+--total_segments: Number of segments to split the dataset into.
+--which_segment: Index of the segment to process.
 
 ### Step3:Detect_skeleton
 
-入口 
-```./skeleton_detect.py```
-
-启动示例：
+Example command​​:
 
 ```python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
 
-注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
+Notes​​:
+The dataset_root_path must contain an img folder with images (multi-level subdirectories allowed).
 
-其余参数解析：
-
---total_segments 将整个数据集切分为几片
-
---which_segment 当前处理第几片数据集
+​​Parameters​​:
+--total_segments: Number of segments to split the dataset into.
+--which_segment: Index of the segment to process.
 
 ### Step3:face_parser(真人)
 
-入口 
-```./face_parse_real.py```
-
-启动示例：
+Example command​​:
 
 ```python face_parse_real.py --dataset_root_path xxx```
 
-注意：dataset_root_path的xxx路径下必须有名为img的文件夹，里面放置需要处理的图片（可以有多级目录）
+Notes​​:
+The dataset_root_path must contain an img folder with images (multi-level subdirectories allowed).
 
-其余参数解析：
+​​Parameters​​:
+--total_segments: Number of segments to split the dataset into.
+--which_segment: Index of the segment to process.
 
---total_segments 将整个数据集切分为几片
-
---which_segment 当前处理第几片数据集
 
 ### Step4:sapiens_seg
 
-入口 
-```./sapiens/seg/seg.sh```
+Modify INPUT, OUTPUT, and VALID_GPU_IDS in the script.
 
-需要修改其中的INPUT、OUTPUT、VALID_GPU_IDS
-
-启动示例：
+​​Example command​​:
 
 ```cd sapiens/seg && bash seg.sh```
 
 ### Step4:sapiens_skeleton
 
-入口 
-```./sapiens/pose/keypoints308.sh```
+Modify INPUT, OUTPUT, and VALID_GPU_IDS in the script.
 
-需要修改其中的INPUT、OUTPUT、VALID_GPU_IDS
-
-启动示例：
+​​Example command​​:
 
 ```cd sapiens/pose && bash keypoints308.sh```
 
 ## 训练数据
-- vcg_122w [不含图片], 467725
+- vcg_122w [no image], 467725
   - https://pan.baidu.com/s/1tuy5hYuYh-k3FDtgp4Vrmw?pwd=yhew 提取码: yhew 
-- vcg_images_80w [不含图片], 123529
+- vcg_images_80w [no image], 123529
   - https://pan.baidu.com/s/12wY4t3EnihINTtIhMCSsWg?pwd=ujb9 提取码: ujb9 
-- vcg_reelshort_0_200 [不含图片], 129446
+- vcg_reelshort_0_200 [no image], 129446
   - https://pan.baidu.com/s/1NtSTz9LENzCrFWn1Ce9f-A?pwd=jqsr 提取码: jqsr 
-- vcg_chat_history_0_300_two_people  [不含图片], 117416
+- vcg_chat_history_0_300_two_people  [no image], 117416
   - https://pan.baidu.com/s/1_KgaiTc0G9WFVPk93hIpIw?pwd=kcgr 提取码: kcgr 
-- flux_img_78_all [含图片], 95798
+- flux_img_78_all [with image], 95798
   - https://pan.baidu.com/s/1zP5ZIrjzd76yWmPgCxgbLg?pwd=gmse 提取码: gmse 
-- flux_anime_1character [含图片], 61847
+- flux_anime_1character [with image], 61847
   - https://pan.baidu.com/s/1Y-jA0PhwEpUeNXDeMXn7_A?pwd=nani 提取码: nani 
-- flux_anime_2characters [含图片], 41357
+- flux_anime_2characters [with image], 41357
   - https://pan.baidu.com/s/1yM2KkJTQuFODNJN3QGxiIg?pwd=c253 提取码: c253 
-- anime_pictures_46w [不含图片], 423535
+- anime_pictures_46w [no image], 423535
   - https://pan.baidu.com/s/1U61GOFYUtZemqJz7_9WEaQ?pwd=wa9x 提取码: wa9x 
-- danbooru_anime [不含图片], 82947
+- danbooru_anime [no image], 82947
   - https://pan.baidu.com/s/1U61GOFYUtZemqJz7_9WEaQ?pwd=wa9x 提取码: wa9x 
 - tuchong
 
 注意：
-其中，vcg_122w, vcg_images_80w, vcg_reelshort_0_200, vcg_chat_history_0_300_two_people, anime_pictures_46w, danbooru_anime，如果需要图片，请发送邮件到wxktongji@163.com，说明身份/用途
+1. For datasets ​​vcg_122w​​, ​​vcg_images_80w​​, ​​vcg_reelshort_0_200​​, ​​vcg_chat_history_0_300_two_people​​, ​​anime_pictures_46w​​, and ​​danbooru_anime​​, email wxktongji@163.com to request images (include your identity/purpose).
+2. Dataset directory structure after decompression:
 
-另外，数据集解压之后，请按照以下结构去除多余目录，以下文件目录格式为准：
 ```|-- anime_pictures_46w
 |   |-- caption
 |   |-- img
@@ -188,8 +168,11 @@ cd data_process
     |-- mask_sapiens
     `-- skeleton_sapiens```
 
-## 验证数据 
-我们准备了真人/动漫，换脸 or 换装的几种case，数据存放地址：./valid_data
+## Validation Data
+
+We have prepared several cases of real people/anime, face-changing or costume changing. 
+Directory: ./valid_data. Please remaining structure unchanged
+
 ```|-- mask
 |   |-- clothes
 |   `-- face
@@ -215,11 +198,11 @@ cd data_process
     |-- clothes
     `-- face```
 
-# 模型
+# Model
 
-换脸模型：FLUX-Inpainting-IPA-face： https://pan.baidu.com/s/1N5gY0GfjXroMyv6DwYw7bw?pwd=p23s 提取码: p23s 
+FLUX-Inpainting-IPA-face： https://pan.baidu.com/s/1N5gY0GfjXroMyv6DwYw7bw?pwd=p23s 提取码: p23s 
 
-换装模型：FLUX-Inpainting-IPA-cloth： https://pan.baidu.com/s/1BKQHrN1Irocs5iHSm43yfA?pwd=8bst 提取码: 8bst 
+FLUX-Inpainting-IPA-cloth： https://pan.baidu.com/s/1BKQHrN1Irocs5iHSm43yfA?pwd=8bst 提取码: 8bst 
 
 antelopev2：https://pan.baidu.com/s/1rDxuSv9FSYiB-sQJm4tmlA?pwd=8p9x 提取码: 8p9x 
 
@@ -227,7 +210,7 @@ CurricularFace：https://pan.baidu.com/s/15AIykSXedKYe9qOqdAHcMQ?pwd=nawi 提取
 
 dinov2_vitg14：https://pan.baidu.com/s/1cl1YPyvUFh24lL7P-ESZfg?pwd=wdrm 提取码: wdrm 
 
-模型目录结构：
+Model directory structure​​:
 ```|-- CurricularFace
 |   `-- CurricularFace_Backbone.pth
 |-- antelopev2
@@ -241,12 +224,12 @@ dinov2_vitg14：https://pan.baidu.com/s/1cl1YPyvUFh24lL7P-ESZfg?pwd=wdrm 提取�
     |-- ip_adaptor_controlnet.safetensors
     `-- ip_adaptor_project.safetensors
 ```
-# 环境
+
+# Environment
 
 ```conda env create -f environment.yml```
 
-# 代码说明
-## 训练
+# Train
 
 ```python3 train_flux_deepspeed_inpainting_ipa.py
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
@@ -257,11 +240,18 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
     --config "train_configs/inpaint_cloth.yaml"
 ```
 
-## 评测
+# Evalution
 
 ```python3 valid_training.py```
 
-# 效果
-![图片描述](./assets/cloth_replace.png)
-![图片描述](./assets/face_replace.png)
-![图片描述](./assets/face_replace2.png)
+# Results
+
+- cloth try on
+![cloth-replace](./assets/cloth_replace.png)
+
+- face sweap
+![face-replace](./assets/face_replace.png)
+![face-replace](./assets/face_replace2.png)
+
+- face sweap + cloth try on
+![face + cloth](./assets/replace_all.png)
