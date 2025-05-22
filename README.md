@@ -3,75 +3,40 @@
 
 cd data_process
 
-### Step1:Lang_sam
+### Step1: Lang_sam, Obtain segmentation of characters in images.
 
-Obtain segmentation of characters in images.
-
-Example command​​:
-```python lang_sam.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
-
-Notes​​:
-The dataset_root_path must contain an img folder with images (multi-level subdirectories allowed).
-
-​​Parameters​​:
---total_segments: Number of segments to split the dataset into.
---which_segment: Index of the segment to process.
+```cd data_process & python lang_sam.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
 
 ### Step2:Detect_skeleton
 
-Example command​​:
-
-```python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
-
-Notes​​:
-The dataset_root_path must contain an img folder with images (multi-level subdirectories allowed).
-
-​​Parameters​​:
---total_segments: Number of segments to split the dataset into.
---which_segment: Index of the segment to process.
+```cd data_process & python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
 
 ### Step3:Detect_skeleton
 
-Example command​​:
-
-```python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
-
-Notes​​:
-The dataset_root_path must contain an img folder with images (multi-level subdirectories allowed).
-
-​​Parameters​​:
---total_segments: Number of segments to split the dataset into.
---which_segment: Index of the segment to process.
+```cd data_process & python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
 
 ### Step3:face_parser(真人)
 
-Example command​​:
+```cd data_process & python face_parse_real.py --dataset_root_path xxx```
 
-```python face_parse_real.py --dataset_root_path xxx```
-
-Notes​​:
+- Notes​​:
 The dataset_root_path must contain an img folder with images (multi-level subdirectories allowed).
 
-​​Parameters​​:
+- ​Parameters​​:
 --total_segments: Number of segments to split the dataset into.
 --which_segment: Index of the segment to process.
 
 
 ### Step4:sapiens_seg
 
-Modify INPUT, OUTPUT, and VALID_GPU_IDS in the script.
-
-​​Example command​​:
-
 ```cd sapiens/seg && bash seg.sh```
+
+Modify INPUT, OUTPUT, and VALID_GPU_IDS in the script.
 
 ### Step4:sapiens_skeleton
 
-Modify INPUT, OUTPUT, and VALID_GPU_IDS in the script.
-
-​​Example command​​:
-
 ```cd sapiens/pose && bash keypoints308.sh```
+Modify INPUT, OUTPUT, and VALID_GPU_IDS in the script.
 
 ## 训练数据
 - vcg_122w [no image], 467725
@@ -94,7 +59,7 @@ Modify INPUT, OUTPUT, and VALID_GPU_IDS in the script.
   - https://pan.baidu.com/s/1U61GOFYUtZemqJz7_9WEaQ?pwd=wa9x 提取码: wa9x 
 - tuchong
 
-注意：
+### Note:
 1. For datasets ​​vcg_122w​​, ​​vcg_images_80w​​, ​​vcg_reelshort_0_200​​, ​​vcg_chat_history_0_300_two_people​​, ​​anime_pictures_46w​​, and ​​danbooru_anime​​, email wxktongji@163.com to request images (include your identity/purpose).
 2. Dataset directory structure after decompression:
 
@@ -166,7 +131,8 @@ Modify INPUT, OUTPUT, and VALID_GPU_IDS in the script.
     |-- json_final
     |-- mask
     |-- mask_sapiens
-    `-- skeleton_sapiens```
+    `-- skeleton_sapiens
+```
 
 ## Validation Data
 
@@ -196,7 +162,8 @@ Directory: ./valid_data. Please remaining structure unchanged
 |   `-- skeleton_sapiens_308
 `-- reference
     |-- clothes
-    `-- face```
+    `-- face
+```
 
 # Model
 
@@ -210,7 +177,7 @@ CurricularFace：https://pan.baidu.com/s/15AIykSXedKYe9qOqdAHcMQ?pwd=nawi 提取
 
 dinov2_vitg14：https://pan.baidu.com/s/1cl1YPyvUFh24lL7P-ESZfg?pwd=wdrm 提取码: wdrm 
 
-Model directory structure​​:
+## Model directory structure​​:
 ```|-- CurricularFace
 |   `-- CurricularFace_Backbone.pth
 |-- antelopev2
