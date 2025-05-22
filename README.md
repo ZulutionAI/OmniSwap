@@ -15,7 +15,7 @@ cd data_process
 
 ```cd data_process & python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
 
-### Step3:face_parser(真人)
+### Step3:face_parser
 
 ```cd data_process & python face_parse_real.py --dataset_root_path xxx```
 
