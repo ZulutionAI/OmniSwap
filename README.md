@@ -1,6 +1,6 @@
 ## Method
 
-OmniSwap: Unified Face and Clothing Swapping in the Wild​
+OmniSwap: Unified Face and Garment Swapping in the Wild​
 
 ![swap-framework](./assets/Flux-inpainting-IPAv1.PNG)
 
