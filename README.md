@@ -262,3 +262,6 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
 ```python3 valid_training.py```
 
 # 效果
+![图片描述](./assets/cloth_replace.png)
+![图片描述](./assets/face_replace.png)
+![图片描述](./assets/face_replace2.png)
