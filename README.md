@@ -1,42 +1,61 @@
-# Dataset
-## Data Processing Pipeline
+## Method
 
-cd data_process
+OmniSwap: Unified Face and Clothing Swapping in the Wild​
 
-### Step1: Lang_sam, Obtain segmentation of characters in images.
+![swap-framework](./assets/Flux-inpainting-IPAv1.PNG)
+
+# Results
+
+- cloth try on
+![cloth-replace](./assets/cloth_replace.png)
+
+- face swap
+1. case1
+![face-replace](./assets/face_replace.png)
+2. case2
+![face-replace](./assets/face_replace2.png)
+
+- face swap + cloth try on
+![face + cloth](./assets/replace_all.png)
+
+## Dataset
+
+### Data Processing Pipeline
+
+```cd data_process```
+
+- Step1: Lang_sam, Obtain segmentation of characters in images.
 
 ```cd data_process & python lang_sam.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
 
-### Step2:Detect_skeleton
+- Step2: Detect_skeleton
 
 ```cd data_process & python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
 
-### Step3:Detect_skeleton
+- Step3: Detect_skeleton
 
 ```cd data_process & python skeleton_detect.py --dataset_root_path xxx --gpu_list 0,1,2,3,4,5,6,7```
 
-### Step3:face_parser
+- Step4: face_parser
 
 ```cd data_process & python face_parse_real.py --dataset_root_path xxx```
 
-### Step4:sapiens_seg
+- Step5: sapiens_seg
 
 ```cd sapiens/seg && bash seg.sh```
 
 Modify INPUT, OUTPUT, and VALID_GPU_IDS in the script.
 
-### Step4:sapiens_skeleton
+- Step6: sapiens_skeleton
 
 ```cd sapiens/pose && bash keypoints308.sh```
 Modify INPUT, OUTPUT, and VALID_GPU_IDS in the script.
 
-### Notes​​:
+#### Notes​​:
 The dataset_root_path must contain an img folder with images (multi-level subdirectories allowed).
-
-### ​Parameters​​:
+​Parameters​​:
 - total_segments: Number of segments to split the dataset into.
 - which_segment: Index of the segment to process.
-
 
 
 ## 训练数据
@@ -58,7 +77,7 @@ The dataset_root_path must contain an img folder with images (multi-level subdir
   - https://pan.baidu.com/s/1U61GOFYUtZemqJz7_9WEaQ?pwd=wa9x 提取码: wa9x 
 - danbooru_anime [no image], 82947
   - https://pan.baidu.com/s/1U61GOFYUtZemqJz7_9WEaQ?pwd=wa9x 提取码: wa9x 
-- tuchong
+- tuchong, coming soon
 
 ### Note:
 1. For datasets ​​vcg_122w​​, ​​vcg_images_80w​​, ​​vcg_reelshort_0_200​​, ​​vcg_chat_history_0_300_two_people​​, ​​anime_pictures_46w​​, and ​​danbooru_anime​​, email wxktongji@163.com to request images (include your identity/purpose).
@@ -179,6 +198,7 @@ CurricularFace：https://pan.baidu.com/s/15AIykSXedKYe9qOqdAHcMQ?pwd=nawi 提取
 dinov2_vitg14：https://pan.baidu.com/s/1cl1YPyvUFh24lL7P-ESZfg?pwd=wdrm 提取码: wdrm 
 
 ## Model directory structure​​:
+
 ```|-- CurricularFace
 |   `-- CurricularFace_Backbone.pth
 |-- antelopev2
@@ -211,17 +231,3 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch \
 # Evalution
 
 ```python3 valid_training.py```
-
-# Results
-
-- cloth try on
-![cloth-replace](./assets/cloth_replace.png)
-
-- face sweap
-1. case1
-![face-replace](./assets/face_replace.png)
-2. case2
-![face-replace](./assets/face_replace2.png)
-
-- face sweap + cloth try on
-![face + cloth](./assets/replace_all.png)
